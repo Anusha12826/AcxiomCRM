@@ -1,0 +1,137 @@
+@model AcxiomCRM.ViewModels.OpportunityEditViewModel
+@using AcxiomCRM.Models.Constants
+@{
+    ViewData["Title"] = $"Edit Opportunity - {Model.OpportunityName}";
+    var customers = ViewBag.Customers as Dictionary<int, string> ?? new();
+    var leads = ViewBag.Leads as Dictionary<int, string> ?? new();
+    var salesExecutives = ViewBag.SalesExecutives as Dictionary<string, string> ?? new();
+}
+
+<div class="row justify-content-center mt-3">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-primary text-white py-3 rounded-top">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Opportunity: @Model.OpportunityName</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="OpportunityId" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <!-- Target Selection -->
+                    <div class="p-3 mb-4 rounded bg-light border">
+                        <label class="form-label fw-bold text-primary mb-2">Associated Account or Lead</label>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="CustomerId" class="form-label fw-semibold"></label>
+                                <select asp-for="CustomerId" class="form-select">
+                                    <option value="">-- Select Customer (Optional) --</option>
+                                    @foreach (var c in customers)
+                                    {
+                                        <option value="@c.Key" selected="@(Model.CustomerId == c.Key)">@c.Value</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CustomerId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="LeadId" class="form-label fw-semibold"></label>
+                                <select asp-for="LeadId" class="form-select">
+                                    <option value="">-- Select Lead (Optional) --</option>
+                                    @foreach (var l in leads)
+                                    {
+                                        <option value="@l.Key" selected="@(Model.LeadId == l.Key)">@l.Value</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="LeadId" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Opportunity Details -->
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="OpportunityName" class="form-label fw-semibold"></label> <span class="text-danger">*</span>
+                            <input asp-for="OpportunityName" class="form-control" autofocus />
+                            <span asp-validation-for="OpportunityName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Amount" class="form-label fw-semibold"></label> <span class="text-danger">*</span>
+                            <div class="input-group">
+                                <span class="input-group-text">₹</span>
+                                <input asp-for="Amount" class="form-control" type="number" step="0.01" min="1" />
+                            </div>
+                            <span asp-validation-for="Amount" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Probability" class="form-label fw-semibold"></label> <span class="text-danger">*</span>
+                            <div class="input-group">
+                                <input asp-for="Probability" class="form-control" type="number" min="0" max="100" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <span asp-validation-for="Probability" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Stage" class="form-label fw-semibold"></label> <span class="text-danger">*</span>
+                            <select asp-for="Stage" class="form-select">
+                                @foreach (var stage in OpportunityStages.AllStages)
+                                {
+                                    <option value="@stage" selected="@(Model.Stage == stage)">@stage</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Stage" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Status" class="form-label fw-semibold"></label> <span class="text-danger">*</span>
+                            <select asp-for="Status" class="form-select">
+                                @foreach (var st in OpportunityStatuses.AllStatuses)
+                                {
+                                    <option value="@st" selected="@(Model.Status == st)">@st</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="ExpectedCloseDate" class="form-label fw-semibold"></label> <span class="text-danger">*</span>
+                            <input asp-for="ExpectedCloseDate" class="form-control" type="date" value="@Model.ExpectedCloseDate.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="ExpectedCloseDate" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="AssignedTo" class="form-label fw-semibold"></label>
+                            <select asp-for="AssignedTo" class="form-select">
+                                <option value="">-- Unassigned --</option>
+                                @foreach (var exec in salesExecutives)
+                                {
+                                    <option value="@exec.Key" selected="@(Model.AssignedTo == exec.Key)">@exec.Value</option>
+                                }
+                            </select>
+                            <span asp-validation-for="AssignedTo" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary fw-semibold px-4">
+                            <i class="bi bi-check-circle me-1"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

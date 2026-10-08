@@ -1,0 +1,255 @@
+@model AcxiomCRM.ViewModels.CustomerDetailsViewModel
+@{
+    ViewData["Title"] = $"Customer Details - {Model.Customer.CustomerName}";
+}
+
+<!-- Profile Header -->
+<div class="card shadow-sm border-0 mb-4 rounded-3">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h3 class="fw-bold mb-0">@Model.Customer.CustomerName</h3>
+                    <span class="badge bg-light text-dark border font-monospace">@Model.Customer.CustomerCode</span>
+                    @if (Model.Customer.Status == "Active")
+                    {
+                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary"><i class="bi bi-pause-circle me-1"></i>Inactive</span>
+                    }
+                </div>
+                <div class="text-muted">
+                    <i class="bi bi-building me-1"></i>@(Model.Customer.CompanyName ?? "Individual Client")
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Customer.CustomerId" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil me-1"></i> Edit Profile
+                </a>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Customers
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Contact & Profile Information -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-person-lines-fill text-primary me-2"></i>Contact Information</h6>
+            </div>
+            <div class="card-body pt-0">
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Email</span>
+                        <span class="fw-semibold"><a href="mailto:@Model.Customer.Email" class="text-decoration-none">@Model.Customer.Email</a></span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Phone</span>
+                        <span class="fw-semibold">@Model.Customer.Phone</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Company</span>
+                        <span class="fw-semibold">@(Model.Customer.CompanyName ?? "-")</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Address</span>
+                        <span class="fw-semibold text-end">@(Model.Customer.Address ?? "-")</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">City, State</span>
+                        <span class="fw-semibold">@Model.Customer.City, @Model.Customer.State</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Assigned To</span>
+                        <span class="badge bg-secondary-subtle text-secondary">
+                            @(Model.Customer.AssignedUser?.FullName ?? Model.Customer.AssignedUser?.Email ?? "Unassigned")
+                        </span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Created Date</span>
+                        <span>@Model.Customer.CreatedDate.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Operations (Deals, Follow-Ups, Activities) -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+                <ul class="nav nav-tabs card-header-tabs" id="customerTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active fw-semibold" id="opps-tab" data-bs-toggle="tab" data-bs-target="#opps" type="button" role="tab">
+                            <i class="bi bi-briefcase me-1"></i> Opportunities (@Model.Opportunities.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-semibold" id="followups-tab" data-bs-toggle="tab" data-bs-target="#followups" type="button" role="tab">
+                            <i class="bi bi-calendar-check me-1"></i> Follow-Ups (@Model.FollowUps.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-semibold" id="activities-tab" data-bs-toggle="tab" data-bs-target="#activities" type="button" role="tab">
+                            <i class="bi bi-clock-history me-1"></i> Activities (@Model.Activities.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-semibold" id="audit-tab" data-bs-toggle="tab" data-bs-target="#audit" type="button" role="tab">
+                            <i class="bi bi-shield-check me-1"></i> Audit History (@Model.AuditHistory.Count)
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body p-0">
+                <div class="tab-content p-3" id="customerTabsContent">
+                    <!-- Opportunities Tab -->
+                    <div class="tab-pane fade show active" id="opps" role="tabpanel">
+                        @if (!Model.Opportunities.Any())
+                        {
+                            <div class="text-center py-4 text-muted small">No opportunities linked to this customer yet.</div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light small">
+                                        <tr>
+                                            <th>Deal Name</th>
+                                            <th>Amount</th>
+                                            <th>Stage</th>
+                                            <th>Probability</th>
+                                            <th>Close Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="small">
+                                        @foreach (var opp in Model.Opportunities)
+                                        {
+                                            <tr>
+                                                <td class="fw-semibold">@opp.OpportunityName</td>
+                                                <td class="fw-bold text-success">₹@opp.Amount.ToString("N0")</td>
+                                                <td><span class="badge bg-light text-dark border">@opp.Stage</span></td>
+                                                <td>@opp.Probability%</td>
+                                                <td>@opp.ExpectedCloseDate.ToString("MMM dd, yyyy")</td>
+                                                <td><span class="badge bg-primary">@opp.Status</span></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Follow-Ups Tab -->
+                    <div class="tab-pane fade" id="followups" role="tabpanel">
+                        @if (!Model.FollowUps.Any())
+                        {
+                            <div class="text-center py-4 text-muted small">No scheduled follow-ups.</div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light small">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Remarks</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="small">
+                                        @foreach (var fu in Model.FollowUps)
+                                        {
+                                            <tr>
+                                                <td>@fu.FollowUpDate.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                                <td><span class="badge bg-light text-dark border">@fu.FollowUpType</span></td>
+                                                <td>@(fu.Remarks ?? "-")</td>
+                                                <td><span class="badge bg-primary">@fu.Status</span></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Activities Tab -->
+                    <div class="tab-pane fade" id="activities" role="tabpanel">
+                        @if (!Model.Activities.Any())
+                        {
+                            <div class="text-center py-4 text-muted small">No activities logged.</div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light small">
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Subject</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="small">
+                                        @foreach (var act in Model.Activities)
+                                        {
+                                            <tr>
+                                                <td><span class="badge bg-light text-dark border">@act.ActivityType</span></td>
+                                                <td class="fw-semibold">@act.Subject</td>
+                                                <td>@act.ActivityDate.ToString("MMM dd, yyyy")</td>
+                                                <td><span class="badge bg-success">@act.Status</span></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Audit History Tab -->
+                    <div class="tab-pane fade" id="audit" role="tabpanel">
+                        @if (!Model.AuditHistory.Any())
+                        {
+                            <div class="text-center py-4 text-muted small">No audit history found for this record.</div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light small">
+                                        <tr>
+                                            <th>Action</th>
+                                            <th>Date</th>
+                                            <th>Result</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="small">
+                                        @foreach (var log in Model.AuditHistory)
+                                        {
+                                            <tr>
+                                                <td><span class="badge bg-dark">@log.Action</span></td>
+                                                <td>@log.CreatedDate.ToLocalTime().ToString("MMM dd, yyyy HH:mm")</td>
+                                                <td><span class="badge bg-success">@log.Result</span></td>
+                                                <td class="text-muted smaller">@(log.Details ?? log.NewValue ?? "-")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

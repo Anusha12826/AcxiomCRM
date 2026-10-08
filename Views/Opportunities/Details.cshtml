@@ -1,0 +1,311 @@
+@model AcxiomCRM.ViewModels.OpportunityDetailsViewModel
+@using AcxiomCRM.Models.Constants
+@{
+    ViewData["Title"] = $"Opportunity - {Model.Opportunity.OpportunityName}";
+    var stages = new[] { "Qualification", "Proposal", "Negotiation", "Won" };
+    var currentStage = Model.Opportunity.Stage;
+    var currentStageIndex = Array.IndexOf(stages, currentStage);
+    if (currentStage == "Lost") currentStageIndex = -1;
+}
+
+<!-- Profile Header -->
+<div class="card shadow-sm border-0 mb-4 rounded-3">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h3 class="fw-bold mb-0">@Model.Opportunity.OpportunityName</h3>
+                    @switch (Model.Opportunity.Stage)
+                    {
+                        case "Won":
+                            <span class="badge bg-success fs-6"><i class="bi bi-trophy me-1"></i>Won</span>
+                            break;
+                        case "Lost":
+                            <span class="badge bg-danger fs-6"><i class="bi bi-x-circle me-1"></i>Lost</span>
+                            break;
+                        case "Negotiation":
+                            <span class="badge bg-primary fs-6">Negotiation</span>
+                            break;
+                        case "Proposal":
+                            <span class="badge bg-info text-dark fs-6">Proposal</span>
+                            break;
+                        default:
+                            <span class="badge bg-light text-dark border fs-6">Qualification</span>
+                            break;
+                    }
+                    <span class="badge bg-secondary">Status: @Model.Opportunity.Status</span>
+                </div>
+                <div class="text-muted">
+                    @if (Model.Opportunity.Customer != null)
+                    {
+                        <i class="bi bi-building me-1"></i>
+                        <a asp-controller="Customers" asp-action="Details" asp-route-id="@Model.Opportunity.CustomerId" class="text-decoration-none">
+                            @Model.Opportunity.Customer.CustomerName (@Model.Opportunity.Customer.CustomerCode)
+                        </a>
+                    }
+                    else if (Model.Opportunity.Lead != null)
+                    {
+                        <i class="bi bi-funnel me-1"></i>
+                        <a asp-controller="Leads" asp-action="Details" asp-route-id="@Model.Opportunity.LeadId" class="text-decoration-none">
+                            @Model.Opportunity.Lead.LeadName (@Model.Opportunity.Lead.LeadCode)
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Opportunity.OpportunityId" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil me-1"></i> Edit Opportunity
+                </a>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Deals
+                </a>
+            </div>
+        </div>
+
+        <!-- Visual Pipeline Progress Bar -->
+        <div class="mt-4 pt-3 border-top">
+            <div class="row g-2 text-center small fw-semibold">
+                @for (int i = 0; i < stages.Length; i++)
+                {
+                    var isCompleted = currentStageIndex >= i;
+                    var isCurrent = currentStage == stages[i];
+                    <div class="col-3">
+                        <div class="p-2 rounded border @(isCurrent ? "bg-primary text-white border-primary" : isCompleted ? "bg-success-subtle text-success border-success" : "bg-light text-muted")">
+                            @if (isCompleted && !isCurrent)
+                            {
+                                <i class="bi bi-check2 me-1"></i>
+                            }
+                            @stages[i]
+                        </div>
+                    </div>
+                }
+            </div>
+            @if (currentStage == "Lost")
+            {
+                <div class="alert alert-danger py-2 mt-2 mb-0 small text-center">
+                    <i class="bi bi-x-circle me-1"></i> This opportunity was closed as <strong>Lost</strong>.
+                </div>
+            }
+        </div>
+
+        <!-- Quick Stage Transition Bar -->
+        <div class="mt-3 pt-3 border-top d-flex align-items-center gap-2 flex-wrap">
+            <span class="small fw-bold text-muted me-2"><i class="bi bi-arrow-right-circle me-1"></i>Transition Stage:</span>
+            @foreach (var stage in OpportunityStages.AllStages)
+            {
+                if (stage != currentStage)
+                {
+                    <form asp-action="UpdateStage" asp-route-id="@Model.Opportunity.OpportunityId" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="newStage" value="@stage" />
+                        <button type="submit" class="btn btn-sm @(stage == "Won" ? "btn-outline-success fw-bold" : stage == "Lost" ? "btn-outline-danger" : "btn-outline-primary")">
+                            @if (stage == "Won") { <i class="bi bi-trophy me-1"></i> }
+                            @if (stage == "Lost") { <i class="bi bi-x me-1"></i> }
+                            Mark as @stage
+                        </button>
+                    </form>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Financial KPI Overview -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 border-start border-primary border-4">
+            <div class="card-body">
+                <div class="text-muted small fw-semibold text-uppercase">Opportunity Value</div>
+                <div class="fs-3 fw-bold text-primary mt-1">₹@Model.Opportunity.Amount.ToString("N0")</div>
+                <div class="small text-muted">Total potential deal contract</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 border-start border-info border-4">
+            <div class="card-body">
+                <div class="text-muted small fw-semibold text-uppercase">Win Probability</div>
+                <div class="fs-3 fw-bold text-info mt-1">@Model.Opportunity.Probability%</div>
+                <div class="progress mt-2" style="height: 6px;">
+                    <div class="progress-bar bg-info" style="width: @Model.Opportunity.Probability%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 border-start border-success border-4">
+            <div class="card-body">
+                <div class="text-muted small fw-semibold text-uppercase">Weighted Pipeline</div>
+                <div class="fs-3 fw-bold text-success mt-1">₹@Model.Opportunity.WeightedPipeline.ToString("N0")</div>
+                <div class="small text-muted">Amount &times; Probability / 100</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Opportunity Info -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-info-circle text-primary me-2"></i>Deal Information</h6>
+            </div>
+            <div class="card-body pt-0">
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Expected Close Date</span>
+                        <span class="fw-semibold">@Model.Opportunity.ExpectedCloseDate.ToString("MMM dd, yyyy")</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Current Stage</span>
+                        <span class="badge bg-light text-dark border">@Model.Opportunity.Stage</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Deal Status</span>
+                        <span>@Model.Opportunity.Status</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Deal Owner</span>
+                        <span class="badge bg-secondary-subtle text-secondary">
+                            @(Model.Opportunity.AssignedUser?.FullName ?? Model.Opportunity.AssignedUser?.Email ?? "Unassigned")
+                        </span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Created Date</span>
+                        <span>@Model.Opportunity.CreatedDate.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Follow-Ups, Activities, Audit -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+                <ul class="nav nav-tabs card-header-tabs" id="oppTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active fw-semibold" id="followups-tab" data-bs-toggle="tab" data-bs-target="#followups" type="button" role="tab">
+                            <i class="bi bi-calendar-check me-1"></i> Follow-Ups (@Model.FollowUps.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-semibold" id="activities-tab" data-bs-toggle="tab" data-bs-target="#activities" type="button" role="tab">
+                            <i class="bi bi-clock-history me-1"></i> Activities (@Model.Activities.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-semibold" id="audit-tab" data-bs-toggle="tab" data-bs-target="#audit" type="button" role="tab">
+                            <i class="bi bi-shield-check me-1"></i> Audit History (@Model.AuditHistory.Count)
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body p-0">
+                <div class="tab-content p-3" id="oppTabsContent">
+                    <!-- Follow-Ups Tab -->
+                    <div class="tab-pane fade show active" id="followups" role="tabpanel">
+                        @if (!Model.FollowUps.Any())
+                        {
+                            <div class="text-center py-4 text-muted small">No scheduled follow-ups for this opportunity.</div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light small">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Remarks</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="small">
+                                        @foreach (var fu in Model.FollowUps)
+                                        {
+                                            <tr>
+                                                <td>@fu.FollowUpDate.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                                <td><span class="badge bg-light text-dark border">@fu.FollowUpType</span></td>
+                                                <td>@(fu.Remarks ?? "-")</td>
+                                                <td><span class="badge bg-primary">@fu.Status</span></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Activities Tab -->
+                    <div class="tab-pane fade" id="activities" role="tabpanel">
+                        @if (!Model.Activities.Any())
+                        {
+                            <div class="text-center py-4 text-muted small">No activities logged.</div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light small">
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Subject</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="small">
+                                        @foreach (var act in Model.Activities)
+                                        {
+                                            <tr>
+                                                <td><span class="badge bg-light text-dark border">@act.ActivityType</span></td>
+                                                <td class="fw-semibold">@act.Subject</td>
+                                                <td>@act.ActivityDate.ToString("MMM dd, yyyy")</td>
+                                                <td><span class="badge bg-success">@act.Status</span></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Audit History Tab -->
+                    <div class="tab-pane fade" id="audit" role="tabpanel">
+                        @if (!Model.AuditHistory.Any())
+                        {
+                            <div class="text-center py-4 text-muted small">No audit history found for this deal.</div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light small">
+                                        <tr>
+                                            <th>Action</th>
+                                            <th>Date</th>
+                                            <th>Result</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="small">
+                                        @foreach (var log in Model.AuditHistory)
+                                        {
+                                            <tr>
+                                                <td><span class="badge bg-dark">@log.Action</span></td>
+                                                <td>@log.CreatedDate.ToLocalTime().ToString("MMM dd, yyyy HH:mm")</td>
+                                                <td><span class="badge bg-success">@log.Result</span></td>
+                                                <td class="text-muted smaller">@(log.Details ?? log.NewValue ?? "-")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

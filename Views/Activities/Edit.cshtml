@@ -1,0 +1,125 @@
+@model AcxiomCRM.ViewModels.ActivityEditViewModel
+@using AcxiomCRM.Models.Constants
+@{
+    ViewData["Title"] = $"Edit Activity - {Model.Subject}";
+    var customers = ViewBag.Customers as Dictionary<int, string> ?? new();
+    var leads = ViewBag.Leads as Dictionary<int, string> ?? new();
+    var salesExecutives = ViewBag.SalesExecutives as Dictionary<string, string> ?? new();
+}
+
+<div class="row justify-content-center mt-3">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-primary text-white py-3 rounded-top">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Activity #@Model.ActivityId</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ActivityId" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <!-- Target Selection -->
+                    <div class="p-3 mb-4 rounded bg-light border">
+                        <label class="form-label fw-bold text-primary mb-2">Associated Client Account or Lead</label>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="CustomerId" class="form-label fw-semibold"></label>
+                                <select asp-for="CustomerId" class="form-select">
+                                    <option value="">-- Select Customer (Optional) --</option>
+                                    @foreach (var c in customers)
+                                    {
+                                        <option value="@c.Key" selected="@(Model.CustomerId == c.Key)">@c.Value</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CustomerId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="LeadId" class="form-label fw-semibold"></label>
+                                <select asp-for="LeadId" class="form-select">
+                                    <option value="">-- Select Lead (Optional) --</option>
+                                    @foreach (var l in leads)
+                                    {
+                                        <option value="@l.Key" selected="@(Model.LeadId == l.Key)">@l.Value</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="LeadId" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Details -->
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="ActivityType" class="form-label fw-semibold"></label> <span class="text-danger">*</span>
+                            <select asp-for="ActivityType" class="form-select">
+                                @foreach (var type in ActivityTypes.AllTypes)
+                                {
+                                    <option value="@type" selected="@(Model.ActivityType == type)">@type</option>
+                                }
+                            </select>
+                            <span asp-validation-for="ActivityType" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-8">
+                            <label asp-for="Subject" class="form-label fw-semibold"></label> <span class="text-danger">*</span>
+                            <input asp-for="Subject" class="form-control" autofocus />
+                            <span asp-validation-for="Subject" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="ActivityDate" class="form-label fw-semibold"></label> <span class="text-danger">*</span>
+                            <input asp-for="ActivityDate" class="form-control" type="datetime-local" value="@Model.ActivityDate.ToString("yyyy-MM-ddTHH:mm")" />
+                            <span asp-validation-for="ActivityDate" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Status" class="form-label fw-semibold"></label> <span class="text-danger">*</span>
+                            <select asp-for="Status" class="form-select">
+                                @foreach (var st in ActivityStatuses.AllStatuses)
+                                {
+                                    <option value="@st" selected="@(Model.Status == st)">@st</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="AssignedTo" class="form-label fw-semibold"></label>
+                            <select asp-for="AssignedTo" class="form-select">
+                                <option value="">-- Unassigned --</option>
+                                @foreach (var exec in salesExecutives)
+                                {
+                                    <option value="@exec.Key" selected="@(Model.AssignedTo == exec.Key)">@exec.Value</option>
+                                }
+                            </select>
+                            <span asp-validation-for="AssignedTo" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary fw-semibold px-4">
+                            <i class="bi bi-check-circle me-1"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

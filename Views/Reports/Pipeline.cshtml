@@ -1,0 +1,187 @@
+@model AcxiomCRM.ViewModels.PipelineReportViewModel
+@{
+    ViewData["Title"] = "Sales Pipeline Stage & Owner Matrix";
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold text-dark mb-0"><i class="bi bi-diagram-3 text-primary me-2"></i>Sales Pipeline Matrix</h3>
+            <span class="text-muted small">Multi-dimensional analysis by stage and account representative</span>
+        </div>
+        <div>
+            <a asp-action="ExportCsv" asp-route-reportType="Pipeline" 
+               asp-route-FromDate="@Model.Filter.FromDate?.ToString("yyyy-MM-dd")"
+               asp-route-ToDate="@Model.Filter.ToDate?.ToString("yyyy-MM-dd")"
+               asp-route-Stage="@Model.Filter.Stage"
+               class="btn btn-outline-success btn-sm me-2">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-printer me-1"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 bg-primary text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-white-50 small text-uppercase fw-bold">Total Pipeline Value</span>
+                        <h3 class="fw-bold mb-0 mt-1">@Model.TotalPipelineValue.ToString("C0")</h3>
+                    </div>
+                    <i class="bi bi-cash-stack fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 bg-success text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-white-50 small text-uppercase fw-bold">Weighted Pipeline Value</span>
+                        <h3 class="fw-bold mb-0 mt-1">@Model.TotalWeightedValue.ToString("C0")</h3>
+                    </div>
+                    <i class="bi bi-graph-up fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 bg-dark text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-white-50 small text-uppercase fw-bold">Total Opportunities</span>
+                        <h3 class="fw-bold mb-0 mt-1">@Model.TotalOpportunitiesCount</h3>
+                    </div>
+                    <i class="bi bi-briefcase fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stage-wise and Owner-wise Distribution Tables -->
+    <div class="row g-4 mb-4">
+        <!-- Stage Breakdown -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-funnel me-2 text-primary"></i>Pipeline By Stage</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Stage</th>
+                                <th class="text-center">Deals</th>
+                                <th class="text-end">Total Amount</th>
+                                <th class="text-end">Weighted</th>
+                                <th class="text-end">Share</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var stage in Model.StageSummaries)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@stage.Stage</td>
+                                    <td class="text-center"><span class="badge bg-light text-dark border">@stage.Count</span></td>
+                                    <td class="text-end fw-semibold">@stage.TotalAmount.ToString("C0")</td>
+                                    <td class="text-end text-success fw-bold">@stage.WeightedAmount.ToString("C0")</td>
+                                    <td class="text-end small text-muted">@stage.PercentageOfPipeline%</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Owner Breakdown -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-person-lines-fill me-2 text-primary"></i>Pipeline By Account Owner</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Representative</th>
+                                <th class="text-center">Deals</th>
+                                <th class="text-end">Total Amount</th>
+                                <th class="text-end">Weighted</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.OwnerSummaries.Any())
+                            {
+                                foreach (var owner in Model.OwnerSummaries)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@owner.OwnerName</td>
+                                        <td class="text-center"><span class="badge bg-light text-dark border">@owner.Count</span></td>
+                                        <td class="text-end fw-semibold">@owner.TotalAmount.ToString("C0")</td>
+                                        <td class="text-end text-success fw-bold">@owner.WeightedAmount.ToString("C0")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">No owner pipeline data available.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Deal Breakdown -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-0">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-list-check me-2 text-primary"></i>Deal-Level Opportunity Listing</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Deal Name</th>
+                        <th>Account</th>
+                        <th>Stage</th>
+                        <th>Amount</th>
+                        <th>Probability</th>
+                        <th>Weighted Value</th>
+                        <th>Expected Close</th>
+                        <th>Owner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Opportunities.Any())
+                    {
+                        foreach (var opp in Model.Opportunities)
+                        {
+                            <tr>
+                                <td class="fw-bold">@opp.OpportunityName</td>
+                                <td>@opp.CustomerOrLeadName</td>
+                                <td><span class="badge bg-light text-dark border">@opp.Stage</span></td>
+                                <td class="fw-bold">@opp.Amount.ToString("C0")</td>
+                                <td>@opp.Probability%</td>
+                                <td class="text-success fw-bold">@opp.WeightedAmount.ToString("C0")</td>
+                                <td class="text-muted small">@opp.ExpectedCloseDate.ToString("yyyy-MM-dd")</td>
+                                <td>@opp.OwnerName</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">No deal records in pipeline.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

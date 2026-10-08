@@ -1,0 +1,164 @@
+@model IEnumerable<AcxiomCRM.ViewModels.UserManagement.UserListViewModel>
+@{
+    ViewData["Title"] = "User & Role Management";
+    var roles = ViewBag.AllRoles as string[] ?? Array.Empty<string>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-people me-2"></i>User & Role Management</h2>
+        <p class="text-muted mb-0">Administer system users, role authorizations, account locks, and security statuses.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary fw-semibold">
+        <i class="bi bi-person-plus me-1"></i> Add New User
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-1"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-1"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search by name or email..." value="@ViewData["Search"]" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="roleFilter" class="form-select">
+                    <option value="">-- All Roles --</option>
+                    @foreach (var role in roles)
+                    {
+                        <option value="@role" selected="@(ViewData["RoleFilter"]?.ToString() == role)">@role</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="statusFilter" class="form-select">
+                    <option value="">-- All Statuses --</option>
+                    <option value="true" selected="@(ViewData["StatusFilter"]?.ToString() == "True")">Active</option>
+                    <option value="false" selected="@(ViewData["StatusFilter"]?.ToString() == "False")">Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Account Status</th>
+                    <th>Security / Lockout</th>
+                    <th>Created</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                            No users found matching the selected criteria.
+                        </td>
+                    </tr>
+                }
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">@user.FullName</div>
+                            <div class="small text-muted">@user.Email</div>
+                        </td>
+                        <td>
+                            @switch (user.Role)
+                            {
+                                case "Admin":
+                                    <span class="badge bg-danger">Admin</span>
+                                    break;
+                                case "Manager":
+                                    <span class="badge bg-primary">Manager</span>
+                                    break;
+                                case "SalesExecutive":
+                                    <span class="badge bg-info text-dark">Sales Executive</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-secondary">@user.Role</span>
+                                    break;
+                            }
+                        </td>
+                        <td>
+                            @if (user.IsActive)
+                            {
+                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary"><i class="bi bi-pause-circle me-1"></i>Inactive</span>
+                            }
+                        </td>
+                        <td>
+                            @if (user.IsLockedOut)
+                            {
+                                <span class="badge bg-danger"><i class="bi bi-lock me-1"></i>Locked</span>
+                                <form asp-action="Unlock" asp-route-id="@user.Id" method="post" class="d-inline ms-1">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-1" title="Unlock user account">Unlock</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-dark border"><i class="bi bi-unlock me-1"></i>Normal</span>
+                                @if (user.AccessFailedCount > 0)
+                                {
+                                    <span class="small text-warning ms-1" title="Failed login count">(@user.AccessFailedCount fails)</span>
+                                }
+                            }
+                        </td>
+                        <td class="small text-muted">
+                            @user.CreatedDate.ToLocalTime().ToString("MMM dd, yyyy")
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group">
+                                <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary" title="Edit User">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="ResetPassword" asp-route-id="@user.Id" class="btn btn-sm btn-outline-warning" title="Reset Password">
+                                    <i class="bi bi-key"></i>
+                                </a>
+                                <form asp-action="ToggleStatus" asp-route-id="@user.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to toggle active status for this user?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm @(user.IsActive ? "btn-outline-danger" : "btn-outline-success")" title="@(user.IsActive ? "Deactivate User" : "Activate User")">
+                                        <i class="bi @(user.IsActive ? "bi-person-dash" : "bi-person-check")"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

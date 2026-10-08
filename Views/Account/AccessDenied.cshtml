@@ -1,0 +1,28 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 text-center">
+        <div class="card shadow-sm border-danger border-top border-4 rounded-3 p-4">
+            <div class="display-1 text-danger mb-3">
+                <i class="bi bi-shield-x"></i>
+            </div>
+            <h2 class="fw-bold text-danger">403 - Access Denied</h2>
+            <p class="text-muted mt-2 fs-5">
+                You do not have permission to access the requested resource or administrative module.
+            </p>
+            <p class="text-secondary small">
+                Your role may not be authorized to view this page or perform this operation. Please contact your CRM Administrator if you believe this is in error.
+            </p>
+            <div class="mt-4">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary px-4 me-2">
+                    <i class="bi bi-house-door me-1"></i> Return to Home
+                </a>
+                <a href="javascript:history.back()" class="btn btn-outline-secondary px-4">
+                    <i class="bi bi-arrow-left me-1"></i> Go Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

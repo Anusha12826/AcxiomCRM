@@ -1,0 +1,223 @@
+@{
+    ViewData["Title"] = "Reports & Analytics";
+    var userRole = (string)ViewBag.UserRole;
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1"><i class="bi bi-file-earmark-bar-graph text-primary me-2"></i>CRM Reports & Business Intelligence</h2>
+            <p class="text-muted mb-0">Role-governed operational analytics, pipeline intelligence, and audit tracking</p>
+        </div>
+        <div>
+            <span class="badge bg-secondary px-3 py-2 fs-6">
+                <i class="bi bi-person-badge me-1"></i> Current Role: @userRole
+            </span>
+        </div>
+    </div>
+
+    <!-- Grid of 8 Reports -->
+    <div class="row g-4">
+        <!-- 1. Customer Report -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-3">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle me-3">
+                            <i class="bi bi-building fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Customer Report</h5>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle small">All Roles</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">Comprehensive customer account listings, geographic distribution, status breakdown, and assigned relationship owners.</p>
+                    <div class="d-grid mt-3">
+                        <a asp-action="Customers" class="btn btn-outline-primary fw-semibold btn-sm">
+                            <i class="bi bi-arrow-right-circle me-1"></i> View Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Lead Report -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-3">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-circle me-3">
+                            <i class="bi bi-funnel fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Lead Report</h5>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle small">All Roles</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">Lead acquisition channels, pipeline qualification status, expected deal valuations, and conversion trajectory.</p>
+                    <div class="d-grid mt-3">
+                        <a asp-action="Leads" class="btn btn-outline-warning text-dark fw-semibold btn-sm">
+                            <i class="bi bi-arrow-right-circle me-1"></i> View Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Follow-Up Report -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-3">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-info bg-opacity-10 text-info p-3 rounded-circle me-3">
+                            <i class="bi bi-calendar-check fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Follow-Up Report</h5>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle small">All Roles</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">Planned client touchpoints, overdue reminders, completed interactions, and representative compliance.</p>
+                    <div class="d-grid mt-3">
+                        <a asp-action="FollowUps" class="btn btn-outline-info text-dark fw-semibold btn-sm">
+                            <i class="bi bi-arrow-right-circle me-1"></i> View Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Opportunity Report -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-3">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle me-3">
+                            <i class="bi bi-graph-up-arrow fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Opportunity Report</h5>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle small">All Roles</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">Pipeline deal valuations, expected close milestones, probability weighting, and won/lost deal outcomes.</p>
+                    <div class="d-grid mt-3">
+                        <a asp-action="Opportunities" class="btn btn-outline-success fw-semibold btn-sm">
+                            <i class="bi bi-arrow-right-circle me-1"></i> View Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Sales Pipeline Report -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-3">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle me-3">
+                            <i class="bi bi-diagram-3 fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Pipeline Matrix</h5>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle small">Stage & Owner</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">Stage-by-stage distribution and sales representative breakdown with automated weighted revenue calculations.</p>
+                    <div class="d-grid mt-3">
+                        <a asp-action="Pipeline" class="btn btn-primary fw-semibold btn-sm">
+                            <i class="bi bi-arrow-right-circle me-1"></i> View Matrix
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Conversion Report -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-3">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-danger bg-opacity-10 text-danger p-3 rounded-circle me-3">
+                            <i class="bi bi-arrow-repeat fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Conversion Report</h5>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle small">Win/Loss Rate</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">Lead-to-customer conversion effectiveness, win/loss percentages, and total realized revenue.</p>
+                    <div class="d-grid mt-3">
+                        <a asp-action="Conversion" class="btn btn-outline-danger fw-semibold btn-sm">
+                            <i class="bi bi-arrow-right-circle me-1"></i> View Conversion
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. User Activity Report -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-3">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-secondary bg-opacity-10 text-secondary p-3 rounded-circle me-3">
+                            <i class="bi bi-people fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">User Activity Report</h5>
+                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle small">Manager & Admin</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">Representative task completion rates, interaction logging (Calls, Meetings, Emails), and team engagement statistics.</p>
+                    <div class="d-grid mt-3">
+                        @if (userRole == "Admin" || userRole == "Manager")
+                        {
+                            <a asp-action="UserActivity" class="btn btn-outline-secondary fw-semibold btn-sm">
+                                <i class="bi bi-arrow-right-circle me-1"></i> View Activities
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-secondary btn-sm disabled" disabled>
+                                <i class="bi bi-lock me-1"></i> Restricted
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Audit Report -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-3">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-dark bg-opacity-10 text-dark p-3 rounded-circle me-3">
+                            <i class="bi bi-shield-check fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Audit Compliance</h5>
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle small">Admin Only</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">Enterprise immutable security events, authentication attempts, state change chronologies, and IP tracking.</p>
+                    <div class="d-grid mt-3">
+                        @if (userRole == "Admin")
+                        {
+                            <a asp-action="Audit" class="btn btn-outline-dark fw-semibold btn-sm">
+                                <i class="bi bi-arrow-right-circle me-1"></i> View Audit Report
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-dark btn-sm disabled" disabled>
+                                <i class="bi bi-lock me-1"></i> Admin Required
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

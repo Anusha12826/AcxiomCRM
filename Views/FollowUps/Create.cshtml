@@ -1,0 +1,115 @@
+@model AcxiomCRM.ViewModels.FollowUpCreateViewModel
+@using AcxiomCRM.Models.Constants
+@{
+    ViewData["Title"] = "Schedule Follow-Up";
+    var customers = ViewBag.Customers as Dictionary<int, string> ?? new();
+    var leads = ViewBag.Leads as Dictionary<int, string> ?? new();
+    var salesExecutives = ViewBag.SalesExecutives as Dictionary<string, string> ?? new();
+}
+
+<div class="row justify-content-center mt-3">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-primary text-white py-3 rounded-top">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-calendar-plus me-2"></i>Schedule Client Follow-Up</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post" id="followUpForm">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <!-- Target Selection -->
+                    <div class="p-3 mb-4 rounded bg-light border">
+                        <label class="form-label fw-bold text-primary mb-2">
+                            <i class="bi bi-bullseye me-1"></i> Target Account or Lead Prospect <span class="text-danger">*</span>
+                        </label>
+                        <p class="small text-muted mb-3">Link this follow-up touchpoint to either an active Customer or an open Lead.</p>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="CustomerId" class="form-label fw-semibold"></label>
+                                <select asp-for="CustomerId" class="form-select" id="customerSelect">
+                                    <option value="">-- Select Customer (Optional) --</option>
+                                    @foreach (var c in customers)
+                                    {
+                                        <option value="@c.Key" selected="@(Model.CustomerId == c.Key)">@c.Value</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CustomerId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="LeadId" class="form-label fw-semibold"></label>
+                                <select asp-for="LeadId" class="form-select" id="leadSelect">
+                                    <option value="">-- Select Lead (Optional) --</option>
+                                    @foreach (var l in leads)
+                                    {
+                                        <option value="@l.Key" selected="@(Model.LeadId == l.Key)">@l.Value</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="LeadId" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Follow-Up Details -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="FollowUpDate" class="form-label fw-semibold"></label> <span class="text-danger">*</span>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                <input asp-for="FollowUpDate" class="form-control" type="datetime-local" min="@DateTime.Today.ToString("yyyy-MM-ddTHH:mm")" value="@Model.FollowUpDate.ToString("yyyy-MM-ddTHH:mm")" />
+                            </div>
+                            <small class="text-muted">Follow-up date cannot be earlier than today.</small>
+                            <span asp-validation-for="FollowUpDate" class="text-danger small d-block"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="FollowUpType" class="form-label fw-semibold"></label> <span class="text-danger">*</span>
+                            <select asp-for="FollowUpType" class="form-select">
+                                @foreach (var type in FollowUpTypes.AllTypes)
+                                {
+                                    <option value="@type" selected="@(Model.FollowUpType == type)">@type</option>
+                                }
+                            </select>
+                            <span asp-validation-for="FollowUpType" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Remarks" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Remarks" class="form-control" rows="3" placeholder="Discussion points, agenda, or background notes..."></textarea>
+                            <span asp-validation-for="Remarks" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="AssignedTo" class="form-label fw-semibold"></label>
+                            <select asp-for="AssignedTo" class="form-select">
+                                <option value="">-- Assign to Myself / Default --</option>
+                                @foreach (var exec in salesExecutives)
+                                {
+                                    <option value="@exec.Key" selected="@(Model.AssignedTo == exec.Key)">@exec.Value</option>
+                                }
+                            </select>
+                            <span asp-validation-for="AssignedTo" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Follow-Ups
+                        </a>
+                        <button type="submit" class="btn btn-primary fw-semibold px-4">
+                            <i class="bi bi-check-circle me-1"></i> Save Follow-Up
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

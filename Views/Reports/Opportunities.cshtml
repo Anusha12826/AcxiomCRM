@@ -1,0 +1,126 @@
+@model AcxiomCRM.ViewModels.GenericReportViewModel<AcxiomCRM.ViewModels.OpportunityReportItem>
+@{
+    ViewData["Title"] = "Opportunity Forecast Report";
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold text-dark mb-0"><i class="bi bi-graph-up-arrow text-success me-2"></i>Opportunity Forecast Report</h3>
+            <span class="text-muted small">Total Deals: <strong>@Model.TotalCount</strong></span>
+        </div>
+        <div>
+            <a asp-action="ExportCsv" asp-route-reportType="Opportunities" 
+               asp-route-FromDate="@Model.Filter.FromDate?.ToString("yyyy-MM-dd")"
+               asp-route-ToDate="@Model.Filter.ToDate?.ToString("yyyy-MM-dd")"
+               asp-route-Stage="@Model.Filter.Stage"
+               asp-route-AssignedTo="@Model.Filter.AssignedTo"
+               class="btn btn-outline-success btn-sm me-2">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-printer me-1"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-3">
+            <form method="get" asp-action="Opportunities" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">From Date</label>
+                    <input type="date" name="FromDate" value="@(Model.Filter.FromDate?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">To Date</label>
+                    <input type="date" name="ToDate" value="@(Model.Filter.ToDate?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">Pipeline Stage</label>
+                    <select name="Stage" class="form-select form-select-sm">
+                        <option value="">All Stages</option>
+                        <option value="Qualification" selected="@(Model.Filter.Stage == "Qualification")">Qualification</option>
+                        <option value="Proposal" selected="@(Model.Filter.Stage == "Proposal")">Proposal</option>
+                        <option value="Negotiation" selected="@(Model.Filter.Stage == "Negotiation")">Negotiation</option>
+                        <option value="Won" selected="@(Model.Filter.Stage == "Won")">Won</option>
+                        <option value="Lost" selected="@(Model.Filter.Stage == "Lost")">Lost</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">Opportunity Owner</label>
+                    <select name="AssignedTo" class="form-select form-select-sm">
+                        <option value="">All Owners</option>
+                        @foreach (var user in Model.AvailableUsers)
+                        {
+                            <option value="@user.Key" selected="@(Model.Filter.AssignedTo == user.Key)">@user.Value</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1">Filter</button>
+                    <a asp-action="Opportunities" class="btn btn-outline-secondary btn-sm">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Deal Name</th>
+                        <th>Account / Lead</th>
+                        <th>Stage</th>
+                        <th>Amount</th>
+                        <th>Probability</th>
+                        <th>Weighted Value</th>
+                        <th>Expected Close</th>
+                        <th>Status</th>
+                        <th>Owner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items.Any())
+                    {
+                        foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="fw-bold">@item.OpportunityName</td>
+                                <td>@(item.CustomerOrLeadName ?? "-")</td>
+                                <td><span class="badge bg-info-subtle text-info border border-info-subtle">@item.Stage</span></td>
+                                <td class="fw-bold">@item.Amount.ToString("C0")</td>
+                                <td>@item.Probability%</td>
+                                <td class="text-success fw-bold">@item.WeightedAmount.ToString("C0")</td>
+                                <td class="text-muted small">@item.ExpectedCloseDate.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    @if (item.Status == "Won")
+                                    {
+                                        <span class="badge bg-success">Won</span>
+                                    }
+                                    else if (item.Status == "Lost")
+                                    {
+                                        <span class="badge bg-danger">Lost</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary">Open</span>
+                                    }
+                                </td>
+                                <td>@item.OwnerName</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-muted">No opportunity records found matching the filter criteria.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
